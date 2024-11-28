@@ -34,8 +34,6 @@ class AssetsManager:
 
         :return: None
         """
-        log.debug("loading assets...")
-
         for asset_path in tqdm(self.assets_dir.rglob("*"), desc="Loading assets"):
             if asset_path.is_file():
                 asset_name = asset_path.stem
@@ -58,8 +56,6 @@ class AssetsManager:
 
                 except Exception as e:
                     log.error(f"failed to load asset {asset_name}: {e}")
-
-        log.debug("assets loaded.")
 
     def get(self, asset_name: str) -> Any:
         """

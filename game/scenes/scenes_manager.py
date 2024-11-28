@@ -1,53 +1,45 @@
 from typing import Optional
+
 from .base_scene import BaseScene
+from .image_scene import ImageScene
 from .menu_scene import MenuScene
+from ..utils.logger import log
+
 
 class ScenesManager:
     def __init__(self):
-        self.scene_stack = []
+        self.scenes = {}
 
-        self.push_scene(MenuScene())
+        self.register_scene("menu", MenuScene())
+        self.register_scene("image", ImageScene())
+
+        self.current_scene_key = "menu"
+
+    def register_scene(self, key: str, scene: BaseScene) -> None:
+        """
+        Register a scene with a specific key.
+
+        :param key: Identifier for the scene.
+        :param scene: The scene object.
+        """
+        self.scenes[key] = scene
+
+    def switch_scene(self, key: str) -> None:
+        """
+        Switch to a different scene by key.
+
+        :param key: Identifier of the scene to switch to.
+        """
+        if key in self.scenes:
+            self.current_scene_key = key
+        else:
+            log.error(f"scene with key '{key}' not found.")
+            raise KeyError(f"Scene with key '{key}' not found.")
 
     def get_current_scene(self) -> Optional[BaseScene]:
         """
-        Returns the current active scene.
+        Get the current active scene.
 
-        :return: The current scene or None if no scenes exist.
+        :return: The current scene or None if no scene is active.
         """
-        return self.scene_stack[-1] if self.scene_stack else None
-
-    def push_scene(self, scene: BaseScene) -> None:
-        """
-        Pushes a new scene onto the stack.
-
-        :param scene: The scene to push.
-        :return: None
-        """
-        self.scene_stack.append(scene)
-
-    def pop_scene(self) -> Optional[BaseScene]:
-        """
-        Removes the top scene from the stack and returns it.
-
-        :return: The removed scene or None if no scenes exist.
-        """
-        return self.scene_stack.pop() if self.scene_stack else None
-
-    def switch_scene(self, scene: BaseScene) -> None:
-        """
-        Replaces the current scene with a new one.
-
-        :param scene: The new scene to switch to.
-        :return: None
-        """
-        if self.scene_stack:
-            self.scene_stack.pop()
-        self.scene_stack.append(scene)
-
-    def clear_scenes(self) -> None:
-        """
-        Clears all scenes from the stack.
-
-        :return: None
-        """
-        self.scene_stack.clear()
+        return self.scenes.get(self.current_scene_key, None)

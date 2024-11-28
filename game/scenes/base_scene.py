@@ -1,18 +1,18 @@
-# game/scenes/base_scene.py
 from abc import ABC, abstractmethod
-
-import pygame
 
 
 class BaseScene(ABC):
+    def __init__(self):
+        self.next_scene = self
+
     @abstractmethod
-    def handle_events(self, event: pygame.event.Event) -> bool:
+    def handle_events(self, events):
         pass
 
     @abstractmethod
-    def update(self) -> None:
+    def update(self):
         pass
 
     @abstractmethod
-    def render(self, screen: pygame.Surface) -> None:
+    def render(self, screen):
         pass

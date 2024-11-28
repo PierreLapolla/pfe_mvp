@@ -31,7 +31,12 @@ class GameLoop:
             if event.type == pygame.QUIT:
                 self.running = False
 
-            if not current_scene.handle_events(event):
+            action = current_scene.handle_events(event)
+
+            if isinstance(action, str):
+                self.scenes_manager.switch_scene(action)
+
+            if action is False:
                 self.running = False
 
     def update(self, current_scene: BaseScene) -> None:
@@ -61,6 +66,10 @@ class GameLoop:
         """
         while self.running:
             current_scene = self.scenes_manager.get_current_scene()
+            if not current_scene:
+                self.running = False
+                break
+
             self.handle_events(current_scene)
             self.update(current_scene)
             self.render(current_scene)
