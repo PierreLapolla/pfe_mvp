@@ -7,7 +7,7 @@ from ..utils.assets_manager import assets
 class MenuScene(BaseScene):
     def __init__(self):
         super().__init__()
-        self.font = assets.get("gameon")
+        self.font = assets.get("gameon", font_size=48)
         self.options = ["Show image", "Quit"]
         self.selected_index = 0
 

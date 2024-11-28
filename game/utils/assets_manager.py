@@ -44,7 +44,7 @@ class AssetsManager:
                         log.debug(f"loaded image: {asset_name}")
 
                     elif asset_path.suffix in [".ttf", ".otf"]:
-                        self.assets[asset_name] = pygame.font.Font(str(asset_path), 24)
+                        self.assets[asset_name] = str(asset_path)
                         log.debug(f"loaded font: {asset_name}")
 
                     elif asset_path.suffix in [".wav", ".mp3", ".ogg"]:
@@ -57,16 +57,22 @@ class AssetsManager:
                 except Exception as e:
                     log.error(f"failed to load asset {asset_name}: {e}")
 
-    def get(self, asset_name: str) -> Any:
+    def get(self, asset_name: str, font_size: int = 24) -> Any:
         """
-        Retrieves an asset by its name.
+        Retrieves an asset by its name. If the asset is a font, it can be retrieved with a specific size.
 
         :param asset_name: The name of the asset (filename without extension).
+        :param font_size: The size of the font (only applicable for font assets).
         :return: The loaded asset or None if not found.
         """
         asset = self.assets.get(asset_name)
         if not asset:
             log.error(f"asset '{asset_name}' not found.")
+            return None
+
+        if isinstance(asset, str):
+            return pygame.font.Font(asset, font_size)
+
         return asset
 
 
