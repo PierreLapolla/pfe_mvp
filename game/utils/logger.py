@@ -3,6 +3,7 @@ from logging.handlers import QueueHandler, QueueListener
 from pathlib import Path
 from queue import Queue
 
+
 class LoggerSingleton:
     """
     Singleton class to initialize and manage the application logger with asynchronous logging support.
@@ -20,20 +21,16 @@ class LoggerSingleton:
         if cls._instance is None:
             cls._instance = super(LoggerSingleton, cls).__new__(cls)
 
-            # Set up the log file
             log_file = Path('logs/app.log')
             log_file.parent.mkdir(parents=True, exist_ok=True)
             if log_file.exists():
                 log_file.unlink()
 
-            # Create a queue for asynchronous logging
             log_queue = Queue()
 
-            # Create and configure the logger
             cls._instance.logger = logging.getLogger('app_logger')
             cls._instance.logger.setLevel(log_level)
 
-            # Set up file handler
             file_handler = logging.FileHandler(log_file)
             file_handler.setLevel(log_level)
 
@@ -41,11 +38,9 @@ class LoggerSingleton:
             formatter = logging.Formatter(log_format)
             file_handler.setFormatter(formatter)
 
-            # Add the queue handler to the logger
             queue_handler = QueueHandler(log_queue)
             cls._instance.logger.addHandler(queue_handler)
 
-            # Set up the queue listener
             listener = QueueListener(log_queue, file_handler)
             listener.start()
 
@@ -63,7 +58,6 @@ class LoggerSingleton:
 
 
 log = LoggerSingleton(log_level=logging.DEBUG).get_logger()
-
 
 # Usage example:
 if __name__ == "__main__":

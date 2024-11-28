@@ -1,76 +1,51 @@
-import os
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Union
 
 import yaml
+from box import Box
 
 from .logger import log
 
 
-class ConfigSingleton:
-    """
-    Singleton class to load and manage configuration from a YAML file and environment variables.
-    """
+class ConfigLoader:
     _instance = None
 
-    def __new__(cls, file_path: Optional[Union[str, Path]] = None) -> 'ConfigSingleton':
+    def __new__(cls, file_path: Union[str, Path]) -> 'ConfigLoader':
         """
-        Create a new instance of ConfigSingleton if it doesn't exist.
+        Implement Singleton pattern to ensure a single global instance.
 
         :param file_path: The path to the configuration YAML file.
-        :return: The singleton instance of ConfigSingleton.
+        :return: The singleton instance of ConfigLoader.
         """
         if cls._instance is None:
-            cls._instance = super(ConfigSingleton, cls).__new__(cls)
-            cls._instance.config = {}
+            cls._instance = super(ConfigLoader, cls).__new__(cls)
 
-            if file_path is not None:
-                config_file = Path(file_path)
-                if config_file.is_file():
-                    with open(config_file, 'r') as file:
-                        cls._instance.config = yaml.safe_load(file) or {}
-                else:
-                    log.error(f"config file '{config_file}' not found")
+            file_path = Path(file_path)
+            if not file_path.exists():
+                log.error(f"config file '{file_path}' not found.")
+                raise FileNotFoundError(f"Config file '{file_path}' not found.")
 
-            cls._instance._merge_env_variables()
+            with open(file_path, 'r') as file:
+                cls._instance._config = Box(yaml.safe_load(file) or {})
+                log.debug(f"config: {cls._instance._config}")
 
         return cls._instance
 
-    def __call__(self, key: str, default: Optional[Any] = None) -> Any:
+    def __getattr__(self, item) -> Any:
         """
-        Get a configuration value by key.
+        Allow direct attribute access through dot notation.
 
-        :param key: The configuration key.
-        :param default: The default value to return if the key is not found.
-        :return: The configuration value or the default value if the key is not found.
+        :param item: The configuration key.
+        :return: The configuration value.
         """
-        if key not in self.config and default is None:
-            log.error(f"config key '{key}' not found and no default value provided")
-            raise KeyError(f"config key '{key}' not found and no default value provided")
+        if item in self._config:
+            return getattr(self._config, item)
 
-        var = self.config.get(key, default)
-
-        if var is None:
-            log.warning(f"config key '{key}' not found, using default value")
-
-        return var
-
-    def _merge_env_variables(self) -> None:
-        """
-        Override configuration values with environment variables where applicable.
-
-        :return: None
-        """
-        for key in self.config:
-            env_value = os.getenv(key)
-            if env_value is not None:
-                log.debug(f"overriding config key '{key}' with value from environment variable '{key}'")
-                self.config[key] = env_value
-
-        for key, value in os.environ.items():
-            if key not in self.config:
-                log.debug(f"adding environment variable '{key}' to config")
-                self.config[key] = value
+        log.error(f"config key '{item}' not found")
+        raise AttributeError(f"'ConfigLoader' object has no attribute '{item}'")
 
 
-config = ConfigSingleton('config.yaml')
+config = ConfigLoader(Path(__file__).parent.parent.parent / 'config.yaml')
+
+if __name__ == '__main__':
+    print(config.screen.width)
