@@ -17,7 +17,6 @@ class ImageScene(BaseScene):
             if event.key == pygame.K_ESCAPE:
                 return "menu"
 
-            # move the image with arrow keys
             if event.key == pygame.K_LEFT:
                 self.img_pos = (self.img_pos[0] - 10, self.img_pos[1])
             elif event.key == pygame.K_RIGHT:
@@ -33,5 +32,4 @@ class ImageScene(BaseScene):
         pass
 
     def render(self, screen: pygame.Surface) -> None:
-        screen.fill((0, 0, 0))
         screen.blit(self.img, self.img_pos)

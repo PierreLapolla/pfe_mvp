@@ -1,37 +1,37 @@
 import pygame
 
 from .base_scene import BaseScene
-from ..utils.assets_manager import assets
+from ..utils.button import Button
+from ..utils.config_loader import config
 
 
 class MenuScene(BaseScene):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self.font = assets.get("gameon", font_size=48)
-        self.options = ["Show image", "Quit"]
-        self.selected_index = 0
+        x_center = config.screen.width // 2
+        y_center = config.screen.height // 2
+        self.buttons: list[Button] = [
+            Button("Show image", "gameon", 24, (x_center, 200), (200, 50), self.show_image),
+            Button("Quit", "gameon", 24, (x_center, 300), (200, 50), self.quit_game),
+        ]
+
+    def show_image(self):
+        return "image"
+
+    def quit_game(self):
+        return False
 
     def handle_events(self, event: pygame.event.Event):
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_DOWN:
-                self.selected_index = (self.selected_index + 1) % len(self.options)
-            elif event.key == pygame.K_UP:
-                self.selected_index = (self.selected_index - 1) % len(self.options)
+        for button in self.buttons:
+            result = button.handle_event(event)
+            if result is not True:
+                return result
 
-            elif event.key == pygame.K_RETURN:
-                if self.selected_index == 0:
-                    return "image"
-                elif self.selected_index == 1:
-                    return False
         return True
 
     def update(self) -> None:
         pass
 
     def render(self, screen: pygame.Surface) -> None:
-        screen.fill((0, 0, 0))
-        for idx, option in enumerate(self.options):
-            color = (255, 255, 255) if idx == self.selected_index else (100, 100, 100)
-            text_surface = self.font.render(option, True, color)
-            screen.blit(text_surface, (screen.get_width() // 2 - text_surface.get_width() // 2,
-                                       screen.get_height() // 2 + idx * 50 - text_surface.get_height() // 2))
+        for button in self.buttons:
+            button.draw(screen)

@@ -3,6 +3,7 @@ import pygame
 from .scenes.base_scene import BaseScene
 from .scenes.scenes_manager import ScenesManager
 from .utils.config_loader import config
+from .utils.assets_manager import assets
 
 
 class GameLoop:
@@ -55,6 +56,9 @@ class GameLoop:
         :param current_scene: The current scene to render.
         :return: None
         """
+        background = assets.get("background")
+        resized_background = pygame.transform.smoothscale(background, (config.screen.width, config.screen.height))
+        self.screen.blit(resized_background, (0, 0))
         current_scene.render(self.screen)
         pygame.display.flip()
 

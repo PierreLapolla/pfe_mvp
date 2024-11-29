@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from typing import Union
+
 
 
 class BaseScene(ABC):
@@ -6,7 +8,7 @@ class BaseScene(ABC):
         self.next_scene = self
 
     @abstractmethod
-    def handle_events(self, events):
+    def handle_events(self, events) -> Union[str, bool]:
         pass
 
     @abstractmethod
